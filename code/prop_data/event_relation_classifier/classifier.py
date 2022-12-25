@@ -696,7 +696,39 @@ def feed_relation_for_dataset(args):
             tmp.append(tmp_es)
         item['events'] = tmp
         new_data.append(item)
-    json.dump(new_data, open(args.test_data_file.rstrip('.json')+'_full.json', 'w'), indent=4)
+    # json.dump(new_data, open(args.test_data_file.replace('.json', '_full.json'), 'w'), indent=4)
+    json.dump(new_data, open(args.test_data_file, 'w'), indent=4)
+
+
+def feed_relation_embedding_id(args):
+    data = json.load(open(args.test_data_file, 'r'))
+    new_data = []
+    for item in data:
+        event_path = item["events"]
+        context_relation_ids = []
+        last_rel = ""
+        for i, cp in enumerate(event_path[0]):
+            if i == 0:
+                context_relation_ids.append('PRP')
+            elif (i + 1) % 2 == 0:
+                context_relation_ids.append(cp.strip())
+                last_rel = cp.strip()
+            else:
+                context_relation_ids.append(last_rel)
+
+        response_relation_ids = []
+        last_rel = ""
+        for j, rp in enumerate(event_path[1]):
+            if (j+1) % 2 == 1:
+                response_relation_ids.append(rp.strip())
+                last_rel = rp.strip()
+            else:
+                response_relation_ids.append(last_rel)
+        item["relation_ids"] = [context_relation_ids, response_relation_ids]
+        new_data.append(item)
+    json.dump(new_data, open(args.test_data_file, 'w'), indent=4)
+
+
 
 
 if __name__ == '__main__':
@@ -713,28 +745,30 @@ if __name__ == '__main__':
         if 'dialogue' in args.mode:
             for split in ['train', 'dev', 'test']:
                 print('infering relation for {} split of dialogue'.format(split))
-                args.test_data_file = '../empatheticdialogues/prop/{}_event_pairs.txt'.format(split)
-                args.prediction_output = '../empatheticdialogues/prop/{}_pred.pkl'.format(split)
+                args.test_data_file = '../../../data/empatheticdialogues/prop/{}_event_pairs.txt'.format(split)
+                args.prediction_output = '../../../data/empatheticdialogues/prop/{}_pred.pkl'.format(split)
                 infer(args)
 
         if 'story' in args.mode:
             for split in ['train', 'dev', 'test']:
                 print('infering relation for {} split of story'.format(split))
-                args.test_data_file = '../rocstories/prop/{}_event_pairs.txt'.format(split)
-                args.prediction_output = '../rocstories/prop/{}_pred.pkl'.format(split)
+                args.test_data_file = '../../../data/rocstories/prop/{}_event_pairs.txt'.format(split)
+                args.prediction_output = '../../../data/rocstories/prop/{}_pred.pkl'.format(split)
                 infer(args)
 
     if 'feed' in args.mode:
         if 'dialogue' in args.mode:
             print('completing event transition path for dialogue')
             for split in ['train', 'dev', 'test']:
-                args.prediction_output = '../empatheticdialogues/prop/{}_pred.pkl'.format(split)
-                args.train_data_file = '../empatheticdialogues/prop/ed_{}.json'.format(split)
-                feed_relation_for_dataset(args)
+                args.prediction_output = '../../../data/empatheticdialogues/prop/{}_pred.pkl'.format(split)
+                args.test_data_file = '../../../data/empatheticdialogues/prop/ed_{}.json'.format(split)
+                # feed_relation_for_dataset(args)
+                feed_relation_embedding_id(args)
 
         if 'story' in args.mode:
             print('completing event transition path for dialogue')
             for split in ['train', 'dev', 'test']:
-                args.prediction_output = '../empatheticdialogues/prop/{}_pred.pkl'.format(split)
-                args.train_data_file = '../empatheticdialogues/prop/ed_{}.json'.format(split)
-                feed_relation_for_dataset(args)
+                args.prediction_output = '../../../data/empatheticdialogues/prop/{}_pred.pkl'.format(split)
+                args.test_data_file = '../../../data/empatheticdialogues/prop/ed_{}.json'.format(split)
+                # feed_relation_for_dataset(args)
+                feed_relation_embedding_id(args)

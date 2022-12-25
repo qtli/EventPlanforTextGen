@@ -154,7 +154,6 @@ def add_pred_path(split='tst'):
         json.dump(new_data, open(config["paths"]["prop_trn"], 'w'), indent=4)
 
 
-
 def add_pred_path_relation_ids(split):
     if split == 'tst':
         split_data = json.load(open(config["paths"]["prop_tst"], 'r'))

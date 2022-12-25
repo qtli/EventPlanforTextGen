@@ -7,7 +7,7 @@ import string
 import sys
 import warnings
 warnings.filterwarnings('ignore')
-
+import math
 from tqdm import tqdm
 from aser.client import ASERClient
 from aser.extract.aser_extractor import SeedRuleASERExtractor, DiscourseASERExtractor
@@ -23,6 +23,50 @@ Please refer to: https://hkust-knowcomp.github.io/ASER/html/tutorial/get-started
 run:
 aser-server -n_workers 1 -n_concurrent_back_socks 10 -port 8000 -port_out 8001 -corenlp_path "YOUR_DIRECTORY/stanford-corenlp-3.9.2" -base_corenlp_port 8000
 '''
+
+
+class BM25(object):
+    def __init__(self, docs):
+        self.D = len(docs)
+        self.avgdl = sum([len(doc)+0.0 for doc in docs]) / self.D
+        self.docs = docs
+        self.f = []  # 列表的每一个元素是一个dict，dict存储着一个文档中每个词的出现次数
+        self.df = {} # 存储每个词及出现了该词的文档数量
+        self.idf = {} # 存储每个词的idf值
+        self.k1 = 1.5
+        self.b = 0.75
+        self.init()
+
+    def init(self):
+        for doc in self.docs:
+            tmp = {}
+            for word in doc:
+                tmp[word] = tmp.get(word, 0) + 1  # 存储每个文档中每个词的出现次数
+            self.f.append(tmp)
+            for k in tmp.keys():
+                self.df[k] = self.df.get(k, 0) + 1
+        for k, v in self.df.items():
+            self.idf[k] = math.log(self.D-v+0.5)-math.log(v+0.5)
+
+    def sim(self, doc, index):
+        score = 0
+        for word in doc:
+            if word not in self.f[index]:
+                continue
+            d = len(self.docs[index])
+            score += (self.idf[word]*self.f[index][word]*(self.k1+1)
+                      / (self.f[index][word]+self.k1*(1-self.b+self.b*d
+                                                      / self.avgdl)))
+        return score
+
+    def simall(self, doc):
+        scores = []
+        for index in range(self.D):
+            score = self.sim(doc, index)
+            scores.append(score)
+        return scores
+
+
 
 def punc(s):
     s = s.replace('_comma_', ',')
@@ -384,17 +428,65 @@ def extract_event_pairs():
 
 
 
+def retrieve_event_from_context():
+    doc = []
+    doc_te = []
+    doc_r = []
+
+    atomic_dev = open('../../../data/atomic/event_triples/dev_event_triples.txt', 'r').readlines()
+    atomic_train = open('../../../data/atomic/event_triples/train_event_triples.txt', 'r').readlines()
+    atomic_test = open('../../../data/atomic/event_triples/test_event_triples.txt', 'r').readlines()
+    for split in [atomic_train, atomic_dev, atomic_test]:
+        for line in split:
+            he, r, te = line.split('\t')
+            he_words = he.strip().split(' ')
+            if '' in he_words:
+                he_words.remove('')
+            doc.append(he_words)
+            doc_te.append(te)
+            doc_r.append(r)
+    s = BM25(doc)
+    print('finish bm25')
+
+
+    for path in [config["paths"]["prop_tst"], config["paths"]["prop_dev"], config["paths"]["prop_trn"]]:
+        data = json.load(open(path, 'r'))
+        new_data = []
+        for i, item in tqdm(enumerate(data), total=len(data)):
+            context = item["context"]
+            context_words = []
+            for c in context:
+                for w in c.split(' '):
+                    w = w.strip()
+                    if w in punctuation_string or w in stopwords:
+                        continue
+                    else:
+                        context_words.append(w)
+            scores = s.simall(context_words)
+            retrieve_he = ' '.join(doc[scores.index(max(scores))])
+            retrieve_te = doc_te[scores.index(max(scores))].strip()
+            retrieve_r = doc_r[scores.index(max(scores))].strip()
+            retrieve_kg = [retrieve_he, retrieve_r, retrieve_te]
+            item['retrieve_event'] = retrieve_kg
+            new_data.append(item)
+        json.dump(new_data, open(path, 'w'), indent=4)
+
+
 if __name__ == '__main__':
     # Step 1: read raw csv files.
-    read_from_raw()
+    # read_from_raw()
 
     # Step 2: parse each utterance into events. (it will takes some time, around 30 minutes)
-    get_dialogue_event()
+    # get_dialogue_event()
 
     # Step 3: remove stopwords from events.
-    simplify_dialogue_event()
+    # simplify_dialogue_event()
 
     # Step 4: extract event pairs from dataset for inferring relations from BERT-based relation classifier.
-    extract_event_pairs()
+    # extract_event_pairs()
+
+    # Step 5: retrieve event from atomic using bm25
+    retrieve_event_from_context()
+
 
 

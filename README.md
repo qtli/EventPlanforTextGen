@@ -2,15 +2,15 @@
 
 This is the repository of the paper, [Event Transition Planning for Open-ended Text Generation](xxx), by [Qintong Li](https://yuchenlin.xyz/), Piji Li, Wei Bi, Zhaochun Ren, Yuxuan Lai, and Lingpeng Kong, in ACL 2022 Findings. 
 
-:confounded
+:mask:
 
-Make an apology: the original / complete code was stored on a server, which was recycled long long ago... Succumb to Procrastination... 
-Therefore the following code is tried to reconstruct based on my local records. 
+Make an apology: the original and complete code was stored on a server, which was recycled long long ago... Succumb to Procrastination... 
+Therefore the following code is reconstruct based on my local records. 
 Sorry again for the late upload.
 
 ---
 
-![DrFact](data/EPTG-model.jpg)
+![DrFact](EPTG-model.jpg)
 
 --- 
 
@@ -43,7 +43,7 @@ To adapt each downstream task, we also collect event transition paths from the  
 
 ### Sampling Paths from ATOMIC
 ```bash
-cd data/atomic
+cd code/prop_data/atomic
 python preprocess.py  # including six steps to process the atomic data.
 ```
 
@@ -62,32 +62,32 @@ python setup.py install
 ```
 After finishing the installation, run ```aser-server -n_workers 1 -n_concurrent_back_socks 10 -port 8000 -port_out 8001 -corenlp_path "YOUR_DIRECTORY/stanford-corenlp-3.9.2" -base_corenlp_port 9000```.
 ```bash
-cd ..
-cd data/empatheticdialogues
+# dialogue dataset
+cd code/prop_data/empatheticdialogues
 python preprocess.py "YOUR_DIRECTORY/stanford-corenlp-3.9.2" # including four steps to process the atomic data.
-cd ..
-cd data/rocstories
+
+# story dataset
+cd code/prop_data_/rocstories
 python preprocess.py "YOUR_DIRECTORY/stanford-corenlp-3.9.2" # including four steps to process the atomic data.
 ```
 
 Then train a BERT classifier using event triples and relations in ATOMIC.
 ```bash
-cd ..
-cd event_relation_classifier
+cd code/prop_data/event_relation_classifier
 CUDA_VISIBLE_DEVICES=0 python classifier.py --mode train_test --warmup_ratio 0.1 
 ```
 
 We use the event relation classifier to complete the event transition path for downstream datasets.
 ```bash
 # dialogue
-CUDA_VISIBLE_DEVICES=0 python classifier.py --mode infer_dialogue
+CUDA_VISIBLE_DEVICES=0 python classifier.py --mode infer_feed_dialogue
 
 # story
-CUDA_VISIBLE_DEVICES=0 python classifier.py --mode infer_story
+CUDA_VISIBLE_DEVICES=0 python classifier.py --mode infer_feed_story
 ```
 
 You could also skip the above processing steps.
-The processed dataset is available at [Dropbox]().  
+The processed dataset is available at [Dropbox](). You could download it and put it under master directory: ```EventPlanforTextGen/data```. 
 
 
 ## Model Training and Inference

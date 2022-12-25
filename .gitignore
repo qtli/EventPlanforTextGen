@@ -3,14 +3,8 @@ bin-debug/
 bin-release/
 [Oo]bj/
 [Bb]in/
-**/*.json
-**/*.csv
-**/*.pkl
-**/*.txt
-**/*.zip
 **/.DS_Store
-**/atomic.graph
-
+data
 .idea
 
 # Other files and folders
