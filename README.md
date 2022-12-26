@@ -126,12 +126,13 @@ wget -O config.json https://s3.amazonaws.com/models.huggingface.co/bert/gpt2-con
 @inproceedings{li-etal-2021-EP4TG,
     title = "Event Transition Planning for Open-ended Text Generation",
     author = "Li, Qintong and Li, Piji and Bi, Wei and Ren, Zhaochun and Lai Yuxuan and Kong Lingpeng",
-    booktitle = "xxx",
+    booktitle = "Findings of the Association for Computational Linguistics: ACL 2022",
     year = "2022",
     address = "Online",
     publisher = "Association for Computational Linguistics",
-    url = "xxx",
-    pages = "xxx"
+    url = "https://aclanthology.org/2022.findings-acl.269/",
+    pages = "https://aclanthology.org/2022.findings-acl.269/",
+    doi = 10.18653/v1/2022.findings-acl.269
 }
 ```
 
