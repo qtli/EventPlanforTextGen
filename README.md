@@ -2,9 +2,11 @@
 
 This is the repository of the paper, [Event Transition Planning for Open-ended Text Generation](xxx), by [Qintong Li](https://yuchenlin.xyz/), Piji Li, Wei Bi, Zhaochun Ren, Yuxuan Lai, and Lingpeng Kong, in ACL 2022 Findings. 
 
-:mask:
 
-Make an apology: the original and complete code was stored on a server, which was recycled long long ago... Succumb to Procrastination... 
+
+Make an apology :mask: 
+
+The original and complete code was stored on a server, which was recycled long long ago... Succumb to Procrastination... 
 Therefore the following code is reconstruct based on my local records. 
 Sorry again for the late upload.
 
@@ -64,11 +66,11 @@ After finishing the installation, run ```aser-server -n_workers 1 -n_concurrent_
 ```bash
 # dialogue dataset
 cd code/prop_data/empatheticdialogues
-python preprocess.py "YOUR_DIRECTORY/stanford-corenlp-3.9.2" # including four steps to process the atomic data.
+python preprocess.py "YOUR_DIRECTORY/stanford-corenlp-3.9.2" # including several steps to process the atomic data.
 
 # story dataset
 cd code/prop_data_/rocstories
-python preprocess.py "YOUR_DIRECTORY/stanford-corenlp-3.9.2" # including four steps to process the atomic data.
+python preprocess.py "YOUR_DIRECTORY/stanford-corenlp-3.9.2" # including several steps to process the atomic data.
 ```
 
 Then train a BERT classifier using event triples and relations in ATOMIC.
@@ -91,7 +93,7 @@ The processed dataset is available at [Dropbox](). You could download it and put
 
 
 ## Model Training and Inference
-
+[to be done]
 
 mkdir -p gpt2-small
 wget -O pytorch_model.bin https://s3.amazonaws.com/models.huggingface.co/bert/gpt2-pytorch_model.bin
