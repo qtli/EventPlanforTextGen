@@ -1,5 +1,6 @@
 import json
 import csv
+import os.path
 import pdb
 import re
 import configparser
@@ -77,6 +78,10 @@ def punc(s):
 
 def read_from_raw():
     tf = csv.reader(open(config["paths"]["raw_tst"]))
+    dir = os.path.dirname(config["paths"]["prop_tst"])
+    if os.path.exists(dir) is False:
+        os.makedirs(dir)
+
     pcid = 'hit:0_conv:0'
     conv = {}
     conv['emotion'] = 'guilty'
@@ -200,6 +205,7 @@ def read_from_raw():
     print(max)  # the maximize total utterance number of the context and response is 6
 
 
+
 def parse_one_old(text, client):
     '''
     transfer a sentence into events
@@ -271,116 +277,46 @@ def get_dialogue_event():
     aser_extractor = DiscourseASERExtractor(
         corenlp_path=sys.argv[1], corenlp_port=9000
     )
-
-    test_data = json.load(open(config["paths"]["prop_tst"], 'r'))
-    new_data = []
-    for i, item in enumerate(tqdm(test_data, desc='test')):
-        context = item['context']
-        dialogue_events = []  # each item contains the events of each utterance
-        for utterance in context:
-            # for i in punctuation_string:   # remove punctuation
-            #     utterance = utterance.replace(i, '')
-            u_e = parse_one(utterance, client=client, extractor=aser_extractor)
-            dialogue_events.append(u_e)
-        response = item['response']
-        u_r = parse_one(response, client=client, extractor=aser_extractor)
-        dialogue_events.append(u_r)
-        item['events'] = dialogue_events
-        new_data.append(item)
-    json.dump(new_data, open(config["paths"]["prop_tst"], 'w'), indent=4)
-
-    dev_data = json.load(open(config["paths"]["prop_dev"], 'r'))
-    new_data = []
-    for i, item in enumerate(tqdm(dev_data, desc='dev')):
-        context = item['context']
-        dialogue_events = []  # each item contains the events of each utterance
-        for utterance in context:
-            # for i in punctuation_string:   # remove punctuation
-            #     utterance = utterance.replace(i, '')
-            u_e = parse_one(utterance, client=client, extractor=aser_extractor)
-            dialogue_events.append(u_e)
-        response = item['response']
-        u_r = parse_one(response, client=client, extractor=aser_extractor)
-        dialogue_events.append(u_r)
-        item['events'] = dialogue_events
-        new_data.append(item)
-    json.dump(new_data, open(config["paths"]["prop_dev"], 'w'), indent=4)
-
-    train_data = json.load(open(config["paths"]["prop_trn"], 'r'))
-    new_data = []
-    for i, item in enumerate(tqdm(train_data, desc='train')):
-        context = item['context']
-        dialogue_events = []  # each item contains the events of each utterance
-        for utterance in context:
-            # for i in punctuation_string:   # remove punctuation
-            #     utterance = utterance.replace(i, '')
-            u_e = parse_one(utterance, client=client, extractor=aser_extractor)
-            dialogue_events.append(u_e)
-        response = item['response']
-        u_r = parse_one(response, client=client, extractor=aser_extractor)
-        dialogue_events.append(u_r)
-        item['events'] = dialogue_events
-        new_data.append(item)
-    json.dump(new_data, open(config["paths"]["prop_trn"], 'w'), indent=4)
-
-
-
+    paths = [config["paths"]["prop_tst"], config["paths"]["prop_dev"], config["paths"]["prop_trn"]]
+    for path in paths:
+        data = json.load(open(path, 'r'))
+        new_data = []
+        for i, item in enumerate(tqdm(data, desc='test')):
+            context = item['context']
+            dialogue_events = []  # each item contains the events of each utterance
+            for utterance in context:
+                # for i in punctuation_string:   # remove punctuation
+                #     utterance = utterance.replace(i, '')
+                u_e = parse_one(utterance, client=client, extractor=aser_extractor)
+                dialogue_events.append(u_e)
+            response = item['response']
+            u_r = parse_one(response, client=client, extractor=aser_extractor)
+            dialogue_events.append(u_r)
+            item['events'] = dialogue_events
+            new_data.append(item)
+        json.dump(new_data, open(path, 'w'), indent=4)
 
 
 def simplify_dialogue_event():
-    test_data = json.load(open(config["paths"]["prop_tst"], 'r'))
-    new_data = []
-    for i, item in enumerate(test_data):
-        dialogue_events = item['events']  # each item contains the events of each utterance
-        dialogue_sim_events = []
-        for u_events in dialogue_events:
-            new_u_events = []
-            for event in u_events:
-                new_event = []
-                for w in event.split():
-                    if w not in stopwords:
-                        new_event.append(w)
-                new_u_events.append(' '.join(new_event))
-            dialogue_sim_events.append(new_u_events)
-        item['sim_events'] = dialogue_sim_events
-        new_data.append(item)
-    json.dump(new_data, open(config["paths"]["prop_tst"], 'w'), indent=4)
-
-    dev_data = json.load(open(config["paths"]["prop_dev"], 'r'))
-    new_data = []
-    for i, item in enumerate(dev_data):
-        dialogue_events = item['events']  # each item contains the events of each utterance
-        dialogue_sim_events = []
-        for u_events in dialogue_events:
-            new_u_events = []
-            for event in u_events:
-                new_event = []
-                for w in event.split():
-                    if w not in stopwords:
-                        new_event.append(w)
-                new_u_events.append(' '.join(new_event))
-            dialogue_sim_events.append(new_u_events)
-        item['sim_events'] = dialogue_sim_events
-        new_data.append(item)
-    json.dump(new_data, open(config["paths"]["prop_dev"], 'w'), indent=4)
-
-    train_data = json.load(open(config["paths"]["prop_trn"], 'r'))
-    new_data = []
-    for i, item in enumerate(train_data):
-        dialogue_events = item['events']  # each item contains the events of each utterance
-        dialogue_sim_events = []
-        for u_events in dialogue_events:
-            new_u_events = []
-            for event in u_events:
-                new_event = []
-                for w in event.split():
-                    if w not in stopwords:
-                        new_event.append(w)
-                new_u_events.append(' '.join(new_event))
-            dialogue_sim_events.append(new_u_events)
-        item['sim_events'] = dialogue_sim_events
-        new_data.append(item)
-    json.dump(new_data, open(config["paths"]["prop_trn"], 'w'), indent=4)
+    paths = [config["paths"]["prop_tst"], config["paths"]["prop_dev"], config["paths"]["prop_trn"]]
+    for path in paths:
+        data = json.load(open(path, 'r'))
+        new_data = []
+        for i, item in enumerate(data):
+            dialogue_events = item['events']  # each item contains the events of each utterance
+            dialogue_sim_events = []
+            for u_events in dialogue_events:
+                new_u_events = []
+                for event in u_events:
+                    new_event = []
+                    for w in event.split():
+                        if w not in stopwords:
+                            new_event.append(w)
+                    new_u_events.append(' '.join(new_event))
+                dialogue_sim_events.append(new_u_events)
+            item['sim_events'] = dialogue_sim_events
+            new_data.append(item)
+        json.dump(new_data, open(path, 'w'), indent=4)
 
 
 def extract_event_pairs():
@@ -432,7 +368,6 @@ def retrieve_event_from_context():
     doc = []
     doc_te = []
     doc_r = []
-
     atomic_dev = open('../../../data/atomic/event_triples/dev_event_triples.txt', 'r').readlines()
     atomic_train = open('../../../data/atomic/event_triples/train_event_triples.txt', 'r').readlines()
     atomic_test = open('../../../data/atomic/event_triples/test_event_triples.txt', 'r').readlines()
@@ -474,18 +409,18 @@ def retrieve_event_from_context():
 
 if __name__ == '__main__':
     # Step 1: read raw csv files.
-    # read_from_raw()
+    read_from_raw()
 
     # Step 2: parse each utterance into events. (it will takes some time, around 30 minutes)
-    # get_dialogue_event()
+    get_dialogue_event()
 
     # Step 3: remove stopwords from events.
-    # simplify_dialogue_event()
+    simplify_dialogue_event()
 
     # Step 4: extract event pairs from dataset for inferring relations from BERT-based relation classifier.
-    # extract_event_pairs()
+    extract_event_pairs()
 
-    # Step 5: retrieve event from atomic using bm25
+    # Step 5: retrieve event from atomic using bm25 (one baseline)
     retrieve_event_from_context()
 
 
