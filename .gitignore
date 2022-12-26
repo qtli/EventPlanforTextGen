@@ -4,7 +4,10 @@ bin-release/
 [Oo]bj/
 [Bb]in/
 **/.DS_Store
-data
+data/atomic
+data/empatheticdialogues
+data/event_relation_classifier
+data/rocstories
 .idea
 
 # Other files and folders
