@@ -89,7 +89,7 @@ CUDA_VISIBLE_DEVICES=0 python classifier.py --mode infer_feed_story
 ```
 
 You could also skip the above processing steps.
-The processed dataset is available at [Dropbox](). You could download it and put it under master directory: ```EventPlanforTextGen/data```. 
+The processed dataset is available at [Dropbox](https://www.dropbox.com/sh/axcmeurevpl8ldr/AACn2kLKyXd2grwI1p3nT3_0a?dl=0). You could download it and put it under master directory: ```EventPlanforTextGen/data```. 
 
 
 ## Model Training and Inference
